@@ -4,9 +4,9 @@ subtitle: "Assessing the Impact of Marine Protected Areas (MPAs) at 5 Reef Sites
 author: "EDS 241"
 date: "1/8/2024 (Due 1/22)"
 output: 
-    pdf_document: default
     html_document:
       theme: flatly
+    pdf_document: default
 ---
 
 ```{r setup, include=FALSE}
@@ -15,7 +15,7 @@ knitr::opts_chunk$set(eval=FALSE, warning = FALSE, message = FALSE )
 
 ------------------------------------------------------------------------
 
-![](figures/spiny1.png)
+![](figures/spiny2.jpg)
 
 ------------------------------------------------------------------------
 
@@ -374,5 +374,5 @@ c. Compare and contrast results with the analysis from the 2012-2018 data sample
 
 ------------------------------------------------------------------------
 
-![](figures/spiny2.jpg)
+![](figures/spiny1.png)
 
