@@ -132,17 +132,17 @@ Create new `df` named `spiny_counts`
 
 spiny_counts <- rawdata %>% 
     group_by(site, year, transect) %>% 
-    summarize(counts = sum(count))
+    summarize(counts = sum(count, na.rm = TRUE),
+              mean_size = mean(size_mm, na.rm = TRUE))
 ```
 
 **e.** Create a new variable `mpa` with levels `MPA` and `non_MPA`. For our regression analysis create a numerical variable `treat` where MPA sites are coded `1` and non_MPA sites are coded `0`
 
 ```{r}
-#HINT(d): Use `group_by()` & `summarize()` to provide the total number of lobsters observed at each site-year-transect row-observation. 
 
-#HINT(e): Use `case_when()` to create the 3 new variable columns
-
-spiny_counts <- 
+mpa <- spiny_counts %>% 
+    mutate(mpa = ifelse(site %in% c("IVEE", "NAPL"), "MPA", "non-MPA"),
+           treat = ifelse(site %in% c("IVEE", "NAPL"), 1, 0))
 
 ```
 
