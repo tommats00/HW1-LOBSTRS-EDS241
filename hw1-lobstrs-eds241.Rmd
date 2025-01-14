@@ -128,12 +128,15 @@ Create new `df` named `spiny_counts`
 ```{r}
 #HINT(d): Use `group_by()` & `summarize()` to provide the total number of lobsters observed at each site-year-transect row-observation. 
 
-#HINT(e): Use `case_when()` to create the 3 new variable columns
 
 spiny_counts <- rawdata %>% 
     group_by(site, year, transect) %>% 
     summarize(counts = sum(count, na.rm = TRUE),
-              mean_size = mean(size_mm, na.rm = TRUE))
+              mean_size = mean(size_mm, na.rm = TRUE)) %>% 
+    mutate(mpa = case_when(site %in% c("IVEE", "NAPL") ~ "MPA",
+                           site %in% c("MOHK", "CARP", "AQUE") ~ "non-MPA"),
+           treat = case_when(mpa == "MPA" ~ 1,
+                             mpa == "non-MPA" ~ 0))
 ```
 
 **e.** Create a new variable `mpa` with levels `MPA` and `non_MPA`. For our regression analysis create a numerical variable `treat` where MPA sites are coded `1` and non_MPA sites are coded `0`
@@ -165,9 +168,33 @@ Step 3: Explore & visualize data
 
 Create plots displaying the distribution of lobster **counts**:
 
-1)  grouped by reef site\
+1)  grouped by reef site
+
+    ```{r}
+    # Histogram
+
+    ggplot(spiny_counts, aes(x = counts)) +
+        geom_histogram(fill = "lightblue") +
+        facet_wrap(~site)
+    ```
+
+    \
+
 2)  grouped by MPA status
-3)  grouped by year
+
+```{r}
+ggplot(spiny_counts, aes(x = counts)) +
+    geom_density() +
+    facet_wrap(~mpa)
+```
+
+1)  grouped by year
+
+```{r}
+ggplot(spiny_counts, aes(x = as.factor(year), y = counts)) +
+    geom_violin()
+    
+```
 
 Create a plot of lobster **size** :
 
@@ -176,8 +203,7 @@ Create a plot of lobster **size** :
 ```{r}
 # plot 1: ....
 
-spiny_counts %>% 
-ggplot()
+beeswarm::beeswarm(data = spiny_counts, mean_size ~ site)
     
 ```
 
@@ -185,6 +211,11 @@ ggplot()
 
 ```{r}
 # USE: gt_summary::tbl_summary()
+
+spiny_counts %>% 
+    ungroup() %>% 
+    dplyr::select(treat, counts, mean_size) %>% 
+    tbl_summary(by = treat)
 ```
 
 ------------------------------------------------------------------------
@@ -198,13 +229,19 @@ Step 4: OLS regression- building intuition
 ```{r}
 # NOTE: We will not evaluate/interpret model fit in this assignment (e.g., R-square)
 
-m1_ols <- 
+m1_ols <- lm(counts ~ treat, data = spiny_counts)
 
 summ(m1_ols, model.fit = FALSE) 
 
 ```
 
+The intercept coefficient represents the y-intercept when treat = 0. The treat coeffcieint represents the slope of our linear regression line.
+
 **c.** Check the model assumptions using the `check_model` function from the `performance` package
+
+```{r}
+check_model(m1_ols)
+```
 
 **d.** Explain the results of the 4 diagnostic plots. Why are we getting this result?
 
