@@ -418,6 +418,10 @@ m5_fixedeffs <- lm(
 summ(m5_fixedeffs, model.fit = FALSE)
 ```
 
+This OLS model is changing the predictors in a variety of ways. First off, instead of predicting counts we are predicting the log(counts + 1). Second we are adding another variable, year, that interacts with our treat variable. The year coefficients increases over time. This suggests that year has a positive impact on the log(counts +1) of lobsters. Likewise, the interaction between treat and year has positive coefficients with some variation, again suggesting the treatment had a positive result on lobster counts over the years.
+
+The negative value of treat suggests, at least initially, there is decrease of log(counts + 1) within MPAs. One of the reasons that comes to mind is that there may be some sort of lag effect of the implementation of the MPA.
+
 **e.** Look at the model predictions: Use the `interact_plot()` function from package `interactions` to plot mean predictions by year and treatment status.
 
 **f.** Re-evaluate your responses (c) and (b) above.
