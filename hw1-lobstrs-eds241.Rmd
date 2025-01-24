@@ -31,7 +31,7 @@ knitr::opts_chunk$set(eval=FALSE, warning = FALSE, message = FALSE )
 
 -   Your knitted presentation should meet the quality you'd submit to research colleagues or feel confident sharing publicly. Refer to the rubric for details about presentation standards.
 
-**Assignment submission (YOUR NAME):** \_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_\_
+**Assignment submission (YOUR NAME):** Tom Gibbens-Matsuyama
 
 ------------------------------------------------------------------------
 
@@ -48,6 +48,8 @@ library(gtsummary)
 library(MASS) ## NOTE: The `select()` function is masked. Use: `dplyr::select()` ##
 library(interactions) 
 library(ggridges)
+library(see)
+library(DHARMa)
 
 ```
 
@@ -245,7 +247,7 @@ summ(m1_ols, model.fit = FALSE)
 
 ```
 
-The intercept coefficient represents the y-intercept when treat = 0. The treat coefficient represents the slope of our linear regression line.
+The intercept coefficient represents the y-intercept when treat = 0. This means we have a baseline count of 22.73 lobsters in non-MPAs. The treat coefficient represents the slope of our linear regression line, meaning when MPAs are present, we have an increase of 5.36 lobster counts.
 
 **c.** Check the model assumptions using the `check_model` function from the `performance` package
 
@@ -259,17 +261,25 @@ check_model(m1_ols)
 check_model(m1_ols,  check = "qq" )
 ```
 
+The "qq" plot above assesses the normality of the residuals. If the residuals were normally distributed, then they would all hover around the green line. We do not see this, suggesting the residuals are not normally distributed. This might indicate our independent and dependent variables don't have a true linear relationship.
+
 ```{r}
 check_model(m1_ols, check = "normality")
 ```
+
+From the normality plot above, we see that the distribution doesn't follow the normal curve. This is similar to the "qq" plot as it suggests there may be a non-linear relationship between independent and dependent variables.
 
 ```{r}
 check_model(m1_ols, check = "homogeneity")
 ```
 
+The homogeneity plot above does not follow does not follow a flat and horizontal shape. This indicates that our model has heteroscedasticity meaning our error increases or decreases as "treat" changes.
+
 ```{r}
 check_model(m1_ols, check = "pp_check")
 ```
+
+The observed data does not follow the model-predicted data, meaning the model might not be a good fit for the relationship of our predictors.
 
 ------------------------------------------------------------------------
 
@@ -288,11 +298,17 @@ Step 5: Fitting GLMs
 
 #HINT2: For the second glm() argument `family` use the following specification option `family = poisson(link = "log")`
 
-m2_pois <- 
+m2_pois <- glm(counts ~ treat,
+               family = poisson(link = "log"),
+               data = spiny_counts)
+
+summ(m2_pois)
 
 ```
 
 **e.** Check the model assumptions. Explain results.
+
+From a Poisson model, we see different coefficients for our intercept and treat. We have an intercept of 3.12, meaning a value of 3.12 lobster counts when treat is equal to 0 or non-MPAs are present. We have a coefficient of 0.21 for treat, meaning we have an increase of 0.21 lobsters when MPAs are present.
 
 **f.** Conduct tests for over-dispersion & zero-inflation. Explain results.
 
@@ -300,13 +316,19 @@ m2_pois <-
 check_model(m2_pois)
 ```
 
+When looking at the plots from the "check_model" function, we still see differences in the observed data vs. the model-predicted data for every plot. This indicates that our model does not fit the data given. We should probably use a different model.
+
 ```{r}
 check_overdispersion(m2_pois)
 ```
 
+We have a really high dispersion ratio of 67.033, suggesting that overdispersion in the model. Overdispersion indicates that the variance is exceeding the mean which we would not expect for a good model.
+
 ```{r}
 check_zeroinflation(m2_pois)
 ```
+
+This function checks for observed zeros in our data and predicted zeros we should expect to see from the model. We have 27 observed zeros while we expect to see 0. The ratio of 0 suggests that we don't have a good model.
 
 **g.** Fit a negative binomial model using the function glm.nb() from the package `MASS` and check model diagnostics
 
@@ -318,25 +340,37 @@ check_zeroinflation(m2_pois)
 
 # NOTE: The `glm.nb()` function does not require a `family` argument
 
-m3_nb <- 
+m3_nb <- glm.nb(counts ~ treat, data = spiny_counts)
+
+summ(m3_nb)
 
 ```
+
+The coefficients for this model are the same as the previous one. The treat coefficient can be interpreted the same as the previous model, indicating that lobster counts increases with a value of 0.21 when MPAs are present. Our standard error values are about 6 times greater than the previous model. Also, the z values are much smaller.
 
 ```{r}
 check_overdispersion(m3_nb)
 ```
 
+There is a much smaller dispersion ratio of 1.398 for this model. We still see overdispersion as the ratio is greater than 1, however it is much smaller than the Poisson model.
+
 ```{r}
 check_zeroinflation(m3_nb)
 ```
+
+This model is much better at predicting zero inflation. We expect to see 30 zeros and we actually observe 27 with a ratio of 1.12.
 
 ```{r}
 check_predictions(m3_nb)
 ```
 
+The observed and model-predicted data follow the same distribution. This is great as it indicates a better model than our previous ones.
+
 ```{r}
 check_model(m3_nb)
 ```
+
+Likewise, the other data within these plots follow what we would expect to see for a good model. So far, this model fits our data the best.
 
 ------------------------------------------------------------------------
 
@@ -348,11 +382,13 @@ Step 6: Compare models
 
 ```{r}
 
-export_summs(# ADD MODELS
+export_summs(m1_ols, m2_pois, m3_nb,
              model.names = c("OLS","Poisson", "NB"),
              statistics = "none")
 
 ```
+
+There is evidence of the treatment effect being robust and stable across the different models. There is robustness from our OLS model compared to the others as there is a significant change in our treat coefficient. Our OLS model has a treat coefficient of 5.36 while our Poisson and NB model have a treat coefficient of 0.21. That being said, there is also stability in the treat coefficient when we jump from a Poisson to NB model. Stated earlier, the treat coefficient stays the same.
 
 ------------------------------------------------------------------------
 
