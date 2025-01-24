@@ -47,6 +47,7 @@ library(gt)
 library(gtsummary)
 library(MASS) ## NOTE: The `select()` function is masked. Use: `dplyr::select()` ##
 library(interactions) 
+library(ggridges)
 
 ```
 
@@ -64,9 +65,9 @@ You're about to dive into some deep data collected from five reef sites in Santa
 
 Why lobsters? Well, this sample provides an opportunity to evaluate the impact of Marine Protected Areas (MPAs) established on January 1, 2012 (Reed, 2019). Of these five reefs, Naples, and Isla Vista are MPAs, while the other three are not protected (non-MPAs). Comparing lobster health between these protected and non-protected areas gives us the chance to study how commercial and recreational fishing might impact these ecosystems.
 
-We will consider the MPA sites the `treatment` group and use regression methods to explore whether protecting these reefs really makes a difference compared to non-MPA sites (our control group). In this assignment, we’ll think deeply about which causal inference assumptions hold up under the research design and identify where they fall short.
+We will consider the MPA sites the `treatment` group and use regression methods to explore whether protecting these reefs really makes a difference compared to non-MPA sites (our control group). In this assignment, we'll think deeply about which causal inference assumptions hold up under the research design and identify where they fall short.
 
-Let’s break it down step by step and see what the data reveals! 📊
+Let's break it down step by step and see what the data reveals! 📊
 
 ![](figures/map-5reefs.png)
 
@@ -129,23 +130,22 @@ Create new `df` named `spiny_counts`
 #HINT(d): Use `group_by()` & `summarize()` to provide the total number of lobsters observed at each site-year-transect row-observation. 
 
 
-spiny_counts <- rawdata %>% 
+spiny_counts <- tidydata %>% 
     group_by(site, year, transect) %>% 
     summarize(counts = sum(count, na.rm = TRUE),
-              mean_size = mean(size_mm, na.rm = TRUE)) %>% 
-    mutate(mpa = case_when(site %in% c("IVEE", "NAPL") ~ "MPA",
-                           site %in% c("MOHK", "CARP", "AQUE") ~ "non-MPA"),
-           treat = case_when(mpa == "MPA" ~ 1,
-                             mpa == "non-MPA" ~ 0))
+              mean_size = mean(size_mm, na.rm = TRUE))
 ```
 
 **e.** Create a new variable `mpa` with levels `MPA` and `non_MPA`. For our regression analysis create a numerical variable `treat` where MPA sites are coded `1` and non_MPA sites are coded `0`
 
 ```{r}
 
-mpa <- spiny_counts %>% 
-    mutate(mpa = ifelse(site %in% c("IVEE", "NAPL"), "MPA", "non-MPA"),
-           treat = ifelse(site %in% c("IVEE", "NAPL"), 1, 0))
+spiny_counts <- spiny_counts %>% 
+    mutate(mpa = case_when(site %in% c("IVEE", "NAPL") ~ "MPA",
+                           site %in% c("MOHK", "CARP", "AQUE") ~ "non-MPA"),
+           treat = case_when(mpa == "MPA" ~ 1,
+                             mpa == "non-MPA" ~ 0))
+
 
 ```
 
@@ -175,6 +175,7 @@ Create plots displaying the distribution of lobster **counts**:
 
     ggplot(spiny_counts, aes(x = counts)) +
         geom_histogram(fill = "lightblue") +
+        geom_vline(aes(xintercept = median(counts))) +
         facet_wrap(~site)
     ```
 
@@ -183,16 +184,20 @@ Create plots displaying the distribution of lobster **counts**:
 2)  grouped by MPA status
 
 ```{r}
-ggplot(spiny_counts, aes(x = counts)) +
+ggplot(spiny_counts, aes(x = counts, 
+                         color = mpa)) +
     geom_density() +
-    facet_wrap(~mpa)
+    geom_vline(aes(xintercept = mean(counts)))
 ```
 
 1)  grouped by year
 
 ```{r}
 ggplot(spiny_counts, aes(x = as.factor(year), y = counts)) +
-    geom_violin()
+    geom_violin() +
+    geom_boxplot(width = 0.2, fill = "white",
+                 color = "red", alpha = 0.2,
+                 position = position_nudge(y = 0))
     
 ```
 
@@ -201,10 +206,13 @@ Create a plot of lobster **size** :
 4)  You choose the grouping variable(s)!
 
 ```{r}
-# plot 1: ....
 
-beeswarm::beeswarm(data = spiny_counts, mean_size ~ site)
-    
+# Ridge plot by transect
+
+
+ggplot(spiny_counts, aes(x = mean_size, y = site, fill = site)) +
+    stat_density_ridges(quantile_lines = TRUE)
+
 ```
 
 **c.** Compare means of the outcome by treatment group. Using the `tbl_summary()` function from the package [`gt_summary`](https://www.danieldsjoberg.com/gtsummary/articles/tbl_summary.html)
@@ -235,7 +243,7 @@ summ(m1_ols, model.fit = FALSE)
 
 ```
 
-The intercept coefficient represents the y-intercept when treat = 0. The treat coeffcieint represents the slope of our linear regression line.
+The intercept coefficient represents the y-intercept when treat = 0. The treat coefficient represents the slope of our linear regression line.
 
 **c.** Check the model assumptions using the `check_model` function from the `performance` package
 
