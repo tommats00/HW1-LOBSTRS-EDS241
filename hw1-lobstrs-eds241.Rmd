@@ -133,7 +133,8 @@ Create new `df` named `spiny_counts`
 spiny_counts <- tidydata %>% 
     group_by(site, year, transect) %>% 
     summarize(counts = sum(count, na.rm = TRUE),
-              mean_size = mean(size_mm, na.rm = TRUE))
+              mean_size = mean(size_mm, na.rm = TRUE)) %>% 
+    ungroup()
 ```
 
 **e.** Create a new variable `mpa` with levels `MPA` and `non_MPA`. For our regression analysis create a numerical variable `treat` where MPA sites are coded `1` and non_MPA sites are coded `0`
@@ -221,9 +222,10 @@ ggplot(spiny_counts, aes(x = mean_size, y = site, fill = site)) +
 # USE: gt_summary::tbl_summary()
 
 spiny_counts %>% 
-    ungroup() %>% 
     dplyr::select(treat, counts, mean_size) %>% 
-    tbl_summary(by = treat)
+    tbl_summary(by = treat,
+                statistic = list(
+      all_continuous() ~ "{mean} ({sd})"))
 ```
 
 ------------------------------------------------------------------------
