@@ -179,7 +179,10 @@ Create plots displaying the distribution of lobster **counts**:
     ggplot(spiny_counts, aes(x = counts)) +
         geom_histogram(fill = "lightblue") +
         geom_vline(aes(xintercept = median(counts))) +
-        facet_wrap(~site)
+        facet_wrap(~site) +
+        labs(y = "Frequency") +
+        theme(axis.text.x = element_blank(),
+              axis.line.x = element_blank())
     ```
 
     \
@@ -190,7 +193,8 @@ Create plots displaying the distribution of lobster **counts**:
 ggplot(spiny_counts, aes(x = counts, 
                          color = mpa)) +
     geom_density() +
-    geom_vline(aes(xintercept = mean(counts)))
+    geom_vline(aes(xintercept = mean(counts))) +
+    facet_wrap(~ mpa)
 ```
 
 1)  grouped by year
@@ -200,7 +204,8 @@ ggplot(spiny_counts, aes(x = as.factor(year), y = counts)) +
     geom_violin() +
     geom_boxplot(width = 0.2, fill = "white",
                  color = "red", alpha = 0.2,
-                 position = position_nudge(y = 0))
+                 position = position_nudge(y = 0)) +
+    labs(x = "Year", y = "Frequency")
     
 ```
 
@@ -214,7 +219,8 @@ Create a plot of lobster **size** :
 
 
 ggplot(spiny_counts, aes(x = mean_size, y = site, fill = site)) +
-    stat_density_ridges(quantile_lines = TRUE)
+    stat_density_ridges(quantile_lines = TRUE) +
+    labs(x = "Mean size (mm)", y = "Site")
 
 ```
 
@@ -291,7 +297,11 @@ Step 5: Fitting GLMs
 
 **c.** Explain the statistical concept of dispersion and overdispersion in the context of this model.
 
+Overdispersion in the context of a Poisson model suggests that the variance is greater than the mean. The variance should be the same as the mean for Poisson distributions.
+
 **d.** Compare results with previous model, explain change in the significance of the treatment effect
+
+From a Poisson model, we see different coefficients for our intercept and treat. We have an intercept of 3.12, meaning a value of 3.12 lobster counts when treat is equal to 0 or non-MPAs are present. We have a coefficient of 0.21 for treat, meaning we have an increase of 0.21 lobsters when MPAs are present.
 
 ```{r}
 #HINT1: Incidence Ratio Rate (IRR): Exponentiation of beta returns coefficient which is interpreted as the 'percent change' for a one unit increase in the predictor 
@@ -308,7 +318,7 @@ summ(m2_pois)
 
 **e.** Check the model assumptions. Explain results.
 
-From a Poisson model, we see different coefficients for our intercept and treat. We have an intercept of 3.12, meaning a value of 3.12 lobster counts when treat is equal to 0 or non-MPAs are present. We have a coefficient of 0.21 for treat, meaning we have an increase of 0.21 lobsters when MPAs are present.
+The poisson assumptions are as follows: 1) probability of one event is not affected by another: 2) average rate of which events occur is constant over time. 3) two events can't occur at the same time. 4) Mean and variance of distribution is equal.
 
 **f.** Conduct tests for over-dispersion & zero-inflation. Explain results.
 
@@ -334,7 +344,11 @@ This function checks for observed zeros in our data and predicted zeros we shoul
 
 **h.** In 1-2 sentences explain rationale for fitting this GLM model.
 
+The negative binomial glm model is often used when you have overdispersion in your Poisson model, which is what we see above.
+
 **i.** Interpret the treatment estimate result in your own words. Compare with results from the previous model.
+
+The coefficients for this model are the same as the previous one. The treat coefficient can be interpreted the same as the previous model, indicating that lobster counts increases with a value of 0.21 when MPAs are present. Our standard error values are about 6 times greater than the previous model. Also, the z values are much smaller.
 
 ```{r}
 
@@ -342,11 +356,9 @@ This function checks for observed zeros in our data and predicted zeros we shoul
 
 m3_nb <- glm.nb(counts ~ treat, data = spiny_counts)
 
-summ(m3_nb)
+summ(m3_nb, model.fit = FALSE)
 
 ```
-
-The coefficients for this model are the same as the previous one. The treat coefficient can be interpreted the same as the previous model, indicating that lobster counts increases with a value of 0.21 when MPAs are present. Our standard error values are about 6 times greater than the previous model. Also, the z values are much smaller.
 
 ```{r}
 check_overdispersion(m3_nb)
@@ -386,9 +398,19 @@ export_summs(m1_ols, m2_pois, m3_nb,
              model.names = c("OLS","Poisson", "NB"),
              statistics = "none")
 
+
+# Calculate percent change in waste piles in each model:
+
+# ratio of treatment beta coeff / intercept
+m1_est_ols = (5.36/22.73)*100  
+m2_est_poi = (exp(0.21) -1)*100  
+m3_est_log = (exp(0.21)- 1)*100     
+
+kableExtra::kable(tibble(m1_est_ols, m2_est_poi, m3_est_log))
+
 ```
 
-There is evidence of the treatment effect being robust and stable across the different models. There is robustness from our OLS model compared to the others as there is a significant change in our treat coefficient. Our OLS model has a treat coefficient of 5.36 while our Poisson and NB model have a treat coefficient of 0.21. That being said, there is also stability in the treat coefficient when we jump from a Poisson to NB model. Stated earlier, the treat coefficient stays the same.
+Our models all have very similar percent change. This suggests the data is robust as we get the same results when running different models. If we had different percent change from each model, it would be difficult to understand which one represents the data the best.
 
 ------------------------------------------------------------------------
 
@@ -404,7 +426,11 @@ Step 7: Building intuition - fixed effects
 
 **c.** Take a look at the regression output. Each coefficient provides a comparison or the difference in means for a specific sub-group in the data. Informally, describe the what the model has estimated at a conceptual level (NOTE: you do not have to interpret coefficients individually)
 
+This OLS model is changing the predictors in a variety of ways. First off, instead of predicting counts we are predicting the log(counts + 1). Second we are adding another variable, year, that interacts with our treat variable. The year coefficients increases over time. This suggests that year has a positive impact on the log(counts +1) of lobsters. Likewise, the interaction between treat and year has positive coefficients with some variation, again suggesting the treatment had a positive result on lobster counts over the years.
+
 **d.** Explain why the main effect for treatment is negative? \*Does this result make sense?
+
+The negative value of treat suggests, at least initially, there is decrease of log(counts + 1) within MPAs. One of the reasons that comes to mind is that there may be some sort of lag effect of the implementation of the MPA.
 
 ```{r}
 
@@ -418,13 +444,11 @@ m5_fixedeffs <- lm(
 summ(m5_fixedeffs, model.fit = FALSE)
 ```
 
-This OLS model is changing the predictors in a variety of ways. First off, instead of predicting counts we are predicting the log(counts + 1). Second we are adding another variable, year, that interacts with our treat variable. The year coefficients increases over time. This suggests that year has a positive impact on the log(counts +1) of lobsters. Likewise, the interaction between treat and year has positive coefficients with some variation, again suggesting the treatment had a positive result on lobster counts over the years.
-
-The negative value of treat suggests, at least initially, there is decrease of log(counts + 1) within MPAs. One of the reasons that comes to mind is that there may be some sort of lag effect of the implementation of the MPA.
-
 **e.** Look at the model predictions: Use the `interact_plot()` function from package `interactions` to plot mean predictions by year and treatment status.
 
 **f.** Re-evaluate your responses (c) and (b) above.
+
+Yes, the plot supports my description of the results above. Initially, the treatment group has a lower log(count + 1) which is why our coefficient is negative. However, for both year and treat \* year, we see an overall positive trend in both the coefficients and the plot.
 
 ```{r}
 
@@ -436,15 +460,22 @@ interact_plot(m5_fixedeffs, pred = year, modx = treat,
 
 ```
 
-**g.** Using `ggplot()` create a plot in same style as the previous `interaction plot`, but displaying the original scale of the outcome variable (lobster counts). This type of plot is commonly used to show how the treatment effect changes across discrete time points (i.e., panel data).
+**g.** Using `ggplot()` create a plot in same style as the previous `interaction plot`, but displaying the original scale of the outcome variable (lobster counts). This type of plot is commonly used to show how the treatment effect changes across discrete time points (i.e., panel data). The treat \* year coefficient have higher values than the year coefficients which is represented by the more positive slope in the plots.
 
 The plot should have... - `year` on the x-axis - `counts` on the y-axis - `mpa` as the grouping variable
 
 ```{r}
 # Hint 1: Group counts by `year` and `mpa` and calculate the `mean_count`
 # Hint 2: Convert variable `year` to a factor
+ff_counts <- ff_counts %>% 
+    group_by(year, mpa) %>% 
+    summarize(mean_count = mean(counts))
 
-plot_counts <- 
+ggplot(ff_counts, aes(x = year, y = mean_count, color = mpa, group = mpa)) +
+    geom_line() +
+    geom_point()
+
+plot_counts
 
 # plot_counts %>% ggplot() ...
 ```
