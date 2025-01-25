@@ -4,10 +4,10 @@ subtitle: "Assessing the Impact of Marine Protected Areas (MPAs) at 5 Reef Sites
 author: "EDS 241"
 date: "1/8/2024 (Due 1/22)"
 output: 
+    pdf_document: default
     html_document:
       theme: flatly
       code_folding: hide 
-    pdf_document: default
 ---
 
 ```{r setup, include=FALSE}
