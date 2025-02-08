@@ -199,7 +199,8 @@ Create plots displaying the distribution of lobster **counts**:
         geom_histogram(fill = "lightblue") +
         geom_vline(aes(xintercept = median(counts))) +
         facet_wrap(~site) +
-        labs(y = "Frequency", x = "Lobsters Observed") +
+        labs(y = "Frequency", x = "Lobsters Observed",
+             title = "Distribution of lobsters observed at each site") +
         theme(axis.text.x = element_blank(),
               axis.line.x = element_blank())
     ```
@@ -218,7 +219,8 @@ ggplot(spiny_counts, aes(x = counts,
     geom_density() +
     geom_vline(aes(xintercept = mean(counts))) +
     facet_wrap(~ mpa) +
-    labs(x = "Counts", y = "Density") +
+    labs(x = "Counts", y = "Density",
+         title = "Distribution of lobster observations between MPAs and Non-MPAs") +
     theme_minimal()
 ```
 
@@ -234,7 +236,8 @@ ggplot(spiny_counts, aes(x = as.factor(year), y = counts)) +
     geom_boxplot(width = 0.2, fill = "white",
                  color = "red", alpha = 0.2,
                  position = position_nudge(y = 0)) +
-    labs(x = "Year", y = "Frequency")
+    labs(x = "Year", y = "Frequency",
+         title = "Distribution of lobster observations from each year")
     
 ```
 
@@ -249,7 +252,8 @@ Create a plot of lobster **size** :
 # Ridge plot by transect
 ggplot(spiny_counts, aes(x = mean_size, y = site, fill = site)) +
     stat_density_ridges(quantile_lines = TRUE) +
-    labs(x = "Mean size (mm)", y = "Site")
+    labs(x = "Mean size (mm)", y = "Site",
+         title = "Distribution of lobster mean size for each site")
 
 ```
 
@@ -281,9 +285,13 @@ m1_ols <- lm(counts ~ treat, data = spiny_counts)
 
 summ(m1_ols, model.fit = FALSE) 
 
+ggplot(spiny_counts, aes(x = treat, y = counts)) +
+    geom_point() +
+    geom_smooth(method = lm)
+
 ```
 
-The intercept coefficient represents the y-intercept when treat = 0. This means we have a baseline count of 22.73 lobsters in non-MPAs. The treat coefficient represents the slope of our linear regression line, meaning when MPAs are present, we have an increase of 5.36 lobster counts.
+The intercept coefficient represents the y-intercept when treat = 0. When the x variable, treat (no MPA) = 0, we expect to see our y-variable (count) equal to 22.73. The treat coefficient represents the slope of our linear regression line, meaning when MPAs are present, we have an increase of 5.36 lobster counts per unit increase of treat. Since treat is a binomial variable, it can only be a 0 or a 1. This indicates that our linear regression model might not be the best fit for our data.
 
 **c.** Check the model assumptions using the `check_model` function from the `performance` package
 
@@ -330,7 +338,7 @@ Step 5: Fitting GLMs
 
 **b.** Interpret the predictor coefficient in your own words. Use full sentences and write your interpretation of the results to be as clear as possible to a non-academic audience.
 
-From a Poisson model, we see different coefficients for our intercept and treat. We have an intercept of 3.12, meaning a value of log 3.12 lobster counts when treat is equal to 0 or non-MPAs are present. We have a coefficient of 0.21 for treat, meaning we have an increase of log 0.21 lobsters when MPAs are present.
+From a Poisson model, we see different coefficients for our intercept and treat. We have an intercept of 3.12, meaning a value of log 3.12 lobster counts when treat is equal to 0 or non-MPAs are present. To find the expected lobster count we need to take the exponential of 3.12 = 22.6 lobsters. Likewise, we have a coeffcient of 0.21 for treat, by taking the exponential of 0.21 = 1.23 times the expected count for the reference group. Meaning we can find the percentage increase by (1.233 - 1) x 100 = 23.3% increase when MPAs are present.
 
 **c.** Explain the statistical concept of dispersion and overdispersion in the context of this model.
 
@@ -338,7 +346,7 @@ Overdispersion in the context of a Poisson model suggests that the variance is g
 
 **d.** Compare results with previous model, explain change in the significance of the treatment effect
 
-We get very different intercept and treatment coefficients from this model because they represent the log of the change for each predictor. We expect to see different values. That being said, we have a different treatment p-value that went from 0.30 to 0.00, suggesting it is significant. OLS models are not meant to be used for "count" data, the Poisson is a better model for this, which is why we may see a significant p-value for our treatment.
+We get very different intercept and treatment coefficients from this model because they represent the log of the change for each predictor. We expect to see different values. That being said, we have a different treatment p-value that went from 0.30 to 0.00, suggesting the treatment of MPAs is significant. OLS models are not meant to be used for "count" data, the Poisson is a better model for this, which is why we may see a significant p-value for our treatment.
 
 ```{r}
 #| code-fold: true
@@ -384,7 +392,7 @@ The negative binomial glm model is often used when you have overdispersion in yo
 
 **i.** Interpret the treatment estimate result in your own words. Compare with results from the previous model.
 
-The coefficients for this model are the same as the previous one. The treat coefficient can be interpreted the same as the previous model, indicating that lobster counts increases with a value of log 0.21 when MPAs are present. Our standard error values are about 6 times greater than the previous model. Also, the z values are much smaller.
+The coefficients for this model are the same as the previous one. The treat coefficient can be interpreted the same as the previous model, indicating that lobster counts increases with a value of log 0.21 when MPAs are present. Our standard error values are about 6 times greater than the previous model. Also, the z values are much smaller. In this model, we have a higher p-value of 0.22 for our treat variable. This is different from the last model as it is now insignificant.
 
 ```{r}
 #| code-fold: true
@@ -451,7 +459,7 @@ kableExtra::kable(tibble(m1_est_ols, m2_est_poi, m3_est_log))
 
 ```
 
-Our models all have very similar percent change. This suggests the data is robust as we get the same results when running different models. If we had different percent change from each model, it would be difficult to understand which one represents the data the best.
+Our models all have very similar percent change. This suggests the data is robust as we get the same results when running different models. If we had different percent change from each model, it would be difficult to understand which one represents the data the best. Now let's compare the coefficients of our models. The OLS model had significantly higher coefficients of 22.73 and 5.36 for our intercept and treat respectively. On the other hand, the next two Logistic models have coefficients of 3.12 and 0.21 for their intercept and treat variables respectively. In order, we went from insignificant, significant, and insignificant p-value for our treat variable.
 
 ------------------------------------------------------------------------
 
@@ -467,11 +475,11 @@ Step 7: Building intuition - fixed effects
 
 **c.** Take a look at the regression output. Each coefficient provides a comparison or the difference in means for a specific sub-group in the data. Informally, describe the what the model has estimated at a conceptual level (NOTE: you do not have to interpret coefficients individually)
 
-This OLS model is changing the predictors in a variety of ways. First off, instead of predicting counts we are predicting the log(counts + 1). Second we are adding another variable, year, that interacts with our treat variable. The year coefficients increases over time. This suggests that year has a positive impact on the log(counts +1) of lobsters. Likewise, the interaction between treat and year has positive coefficients with some variation, again suggesting the treatment had a positive result on lobster counts over the years.
+This OLS model is changing the predictors in a variety of ways. First off, instead of predicting counts we are predicting the log(counts + 1). Second we are adding another variable, year, that interacts with our treat variable. The year coefficients increases over time. This suggests that year has a positive impact on the log(counts +1) of lobsters. Likewise, the interaction between treat and year has positive coefficients with some variation, again suggesting the treatment had a positive result on lobster counts over the years. From this model, we are interested in looking at how the year variable and the treat::year interaction variable is affecting our target variable. As the years progress, the treat::year coeffciients are increasing at a higher rate than our year variable, suggesting that MPAs have significant impact on lobster counts.
 
 **d.** Explain why the main effect for treatment is negative? \*Does this result make sense?
 
-The negative value of treat suggests, at least initially, there is decrease of log(counts + 1) within MPAs. One of the reasons that comes to mind is that there may be some sort of lag effect of the implementation of the MPA.
+The coefficient for treatment is -1.23. Let's go through this. When treat = 0, indicating no MPAs, then we have a higher initial count (in log(counts + 1) )value. When treat equals 1, we apply this negative to our intercept implying that we have a lower count value. This is for our reference year of 2012, where we just started comparing MPAs vs non-MPAs, so having a lower count initially is okay as the effects having started yet.
 
 ```{r}
 #| code-fold: true
