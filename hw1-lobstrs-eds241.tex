@@ -419,7 +419,8 @@ Create plots displaying the distribution of lobster \textbf{counts}:
     \FunctionTok{geom\_histogram}\NormalTok{(}\AttributeTok{fill =} \StringTok{"lightblue"}\NormalTok{) }\SpecialCharTok{+}
     \FunctionTok{geom\_vline}\NormalTok{(}\FunctionTok{aes}\NormalTok{(}\AttributeTok{xintercept =} \FunctionTok{median}\NormalTok{(counts))) }\SpecialCharTok{+}
     \FunctionTok{facet\_wrap}\NormalTok{(}\SpecialCharTok{\textasciitilde{}}\NormalTok{site) }\SpecialCharTok{+}
-    \FunctionTok{labs}\NormalTok{(}\AttributeTok{y =} \StringTok{"Frequency"}\NormalTok{, }\AttributeTok{x =} \StringTok{"Lobsters Observed"}\NormalTok{) }\SpecialCharTok{+}
+    \FunctionTok{labs}\NormalTok{(}\AttributeTok{y =} \StringTok{"Frequency"}\NormalTok{, }\AttributeTok{x =} \StringTok{"Lobsters Observed"}\NormalTok{,}
+         \AttributeTok{title =} \StringTok{"Distribution of lobsters observed at each site"}\NormalTok{) }\SpecialCharTok{+}
     \FunctionTok{theme}\NormalTok{(}\AttributeTok{axis.text.x =} \FunctionTok{element\_blank}\NormalTok{(),}
           \AttributeTok{axis.line.x =} \FunctionTok{element\_blank}\NormalTok{())}
 \end{Highlighting}
@@ -440,7 +441,8 @@ Create plots displaying the distribution of lobster \textbf{counts}:
     \FunctionTok{geom\_density}\NormalTok{() }\SpecialCharTok{+}
     \FunctionTok{geom\_vline}\NormalTok{(}\FunctionTok{aes}\NormalTok{(}\AttributeTok{xintercept =} \FunctionTok{mean}\NormalTok{(counts))) }\SpecialCharTok{+}
     \FunctionTok{facet\_wrap}\NormalTok{(}\SpecialCharTok{\textasciitilde{}}\NormalTok{ mpa) }\SpecialCharTok{+}
-    \FunctionTok{labs}\NormalTok{(}\AttributeTok{x =} \StringTok{"Counts"}\NormalTok{, }\AttributeTok{y =} \StringTok{"Density"}\NormalTok{) }\SpecialCharTok{+}
+    \FunctionTok{labs}\NormalTok{(}\AttributeTok{x =} \StringTok{"Counts"}\NormalTok{, }\AttributeTok{y =} \StringTok{"Density"}\NormalTok{,}
+         \AttributeTok{title =} \StringTok{"Distribution of lobster observations between MPAs and Non{-}MPAs"}\NormalTok{) }\SpecialCharTok{+}
     \FunctionTok{theme\_minimal}\NormalTok{()}
 \end{Highlighting}
 \end{Shaded}
@@ -462,7 +464,8 @@ Create plots displaying the distribution of lobster \textbf{counts}:
     \FunctionTok{geom\_boxplot}\NormalTok{(}\AttributeTok{width =} \FloatTok{0.2}\NormalTok{, }\AttributeTok{fill =} \StringTok{"white"}\NormalTok{,}
                  \AttributeTok{color =} \StringTok{"red"}\NormalTok{, }\AttributeTok{alpha =} \FloatTok{0.2}\NormalTok{,}
                  \AttributeTok{position =} \FunctionTok{position\_nudge}\NormalTok{(}\AttributeTok{y =} \DecValTok{0}\NormalTok{)) }\SpecialCharTok{+}
-    \FunctionTok{labs}\NormalTok{(}\AttributeTok{x =} \StringTok{"Year"}\NormalTok{, }\AttributeTok{y =} \StringTok{"Frequency"}\NormalTok{)}
+    \FunctionTok{labs}\NormalTok{(}\AttributeTok{x =} \StringTok{"Year"}\NormalTok{, }\AttributeTok{y =} \StringTok{"Frequency"}\NormalTok{,}
+         \AttributeTok{title =} \StringTok{"Distribution of lobster observations from each year"}\NormalTok{)}
 \end{Highlighting}
 \end{Shaded}
 
@@ -483,7 +486,8 @@ Create a plot of lobster \textbf{size} :
 \CommentTok{\# Ridge plot by transect}
 \FunctionTok{ggplot}\NormalTok{(spiny\_counts, }\FunctionTok{aes}\NormalTok{(}\AttributeTok{x =}\NormalTok{ mean\_size, }\AttributeTok{y =}\NormalTok{ site, }\AttributeTok{fill =}\NormalTok{ site)) }\SpecialCharTok{+}
     \FunctionTok{stat\_density\_ridges}\NormalTok{(}\AttributeTok{quantile\_lines =} \ConstantTok{TRUE}\NormalTok{) }\SpecialCharTok{+}
-    \FunctionTok{labs}\NormalTok{(}\AttributeTok{x =} \StringTok{"Mean size (mm)"}\NormalTok{, }\AttributeTok{y =} \StringTok{"Site"}\NormalTok{)}
+    \FunctionTok{labs}\NormalTok{(}\AttributeTok{x =} \StringTok{"Mean size (mm)"}\NormalTok{, }\AttributeTok{y =} \StringTok{"Site"}\NormalTok{,}
+         \AttributeTok{title =} \StringTok{"Distribution of lobster mean size for each site"}\NormalTok{)}
 \end{Highlighting}
 \end{Shaded}
 
@@ -569,11 +573,23 @@ treat & 5.36 & 5.20 & 1.03 & 0.30\\
 \end{threeparttable}
 \end{table}
 
+\begin{Shaded}
+\begin{Highlighting}[]
+\FunctionTok{ggplot}\NormalTok{(spiny\_counts, }\FunctionTok{aes}\NormalTok{(}\AttributeTok{x =}\NormalTok{ treat, }\AttributeTok{y =}\NormalTok{ counts)) }\SpecialCharTok{+}
+    \FunctionTok{geom\_point}\NormalTok{() }\SpecialCharTok{+}
+    \FunctionTok{geom\_smooth}\NormalTok{(}\AttributeTok{method =}\NormalTok{ lm)}
+\end{Highlighting}
+\end{Shaded}
+
+\includegraphics{hw1-lobstrs-eds241_files/figure-latex/unnamed-chunk-11-1.pdf}
+
 The intercept coefficient represents the y-intercept when treat = 0.
-This means we have a baseline count of 22.73 lobsters in non-MPAs. The
-treat coefficient represents the slope of our linear regression line,
-meaning when MPAs are present, we have an increase of 5.36 lobster
-counts.
+When the x variable, treat (no MPA) = 0, we expect to see our y-variable
+(count) equal to 22.73. The treat coefficient represents the slope of
+our linear regression line, meaning when MPAs are present, we have an
+increase of 5.36 lobster counts per unit increase of treat. Since treat
+is a binomial variable, it can only be a 0 or a 1. This indicates that
+our linear regression model might not be the best fit for our data.
 
 \textbf{c.} Check the model assumptions using the \texttt{check\_model}
 function from the \texttt{performance} package
@@ -657,9 +673,12 @@ clear as possible to a non-academic audience.
 
 From a Poisson model, we see different coefficients for our intercept
 and treat. We have an intercept of 3.12, meaning a value of log 3.12
-lobster counts when treat is equal to 0 or non-MPAs are present. We have
-a coefficient of 0.21 for treat, meaning we have an increase of log 0.21
-lobsters when MPAs are present.
+lobster counts when treat is equal to 0 or non-MPAs are present. To find
+the expected lobster count we need to take the exponential of 3.12 =
+22.6 lobsters. Likewise, we have a coeffcient of 0.21 for treat, by
+taking the exponential of 0.21 = 1.23 times the expected count for the
+reference group. Meaning we can find the percentage increase by (1.233 -
+1) x 100 = 23.3\% increase when MPAs are present.
 
 \textbf{c.} Explain the statistical concept of dispersion and
 overdispersion in the context of this model.
@@ -674,10 +693,10 @@ significance of the treatment effect
 We get very different intercept and treatment coefficients from this
 model because they represent the log of the change for each predictor.
 We expect to see different values. That being said, we have a different
-treatment p-value that went from 0.30 to 0.00, suggesting it is
-significant. OLS models are not meant to be used for ``count'' data, the
-Poisson is a better model for this, which is why we may see a
-significant p-value for our treatment.
+treatment p-value that went from 0.30 to 0.00, suggesting the treatment
+of MPAs is significant. OLS models are not meant to be used for
+``count'' data, the Poisson is a better model for this, which is why we
+may see a significant p-value for our treatment.
 
 \begin{Shaded}
 \begin{Highlighting}[]
@@ -793,7 +812,9 @@ The coefficients for this model are the same as the previous one. The
 treat coefficient can be interpreted the same as the previous model,
 indicating that lobster counts increases with a value of log 0.21 when
 MPAs are present. Our standard error values are about 6 times greater
-than the previous model. Also, the z values are much smaller.
+than the previous model. Also, the z values are much smaller. In this
+model, we have a higher p-value of 0.22 for our treat variable. This is
+different from the last model as it is now insignificant.
 
 \begin{Shaded}
 \begin{Highlighting}[]
@@ -1007,7 +1028,13 @@ m1\_est\_ols & m2\_est\_poi & m3\_est\_log \\
 Our models all have very similar percent change. This suggests the data
 is robust as we get the same results when running different models. If
 we had different percent change from each model, it would be difficult
-to understand which one represents the data the best.
+to understand which one represents the data the best. Now let's compare
+the coefficients of our models. The OLS model had significantly higher
+coefficients of 22.73 and 5.36 for our intercept and treat respectively.
+On the other hand, the next two Logistic models have coefficients of
+3.12 and 0.21 for their intercept and treat variables respectively. In
+order, we went from insignificant, significant, and insignificant
+p-value for our treat variable.
 
 \begin{center}\rule{0.5\linewidth}{0.5pt}\end{center}
 
@@ -1042,15 +1069,23 @@ treat variable. The year coefficients increases over time. This suggests
 that year has a positive impact on the log(counts +1) of lobsters.
 Likewise, the interaction between treat and year has positive
 coefficients with some variation, again suggesting the treatment had a
-positive result on lobster counts over the years.
+positive result on lobster counts over the years. From this model, we
+are interested in looking at how the year variable and the treat::year
+interaction variable is affecting our target variable. As the years
+progress, the treat::year coeffciients are increasing at a higher rate
+than our year variable, suggesting that MPAs have significant impact on
+lobster counts.
 
 \textbf{d.} Explain why the main effect for treatment is negative? *Does
 this result make sense?
 
-The negative value of treat suggests, at least initially, there is
-decrease of log(counts + 1) within MPAs. One of the reasons that comes
-to mind is that there may be some sort of lag effect of the
-implementation of the MPA.
+The coefficient for treatment is -1.23. Let's go through this. When
+treat = 0, indicating no MPAs, then we have a higher initial count (in
+log(counts + 1) )value. When treat equals 1, we apply this negative to
+our intercept implying that we have a lower count value. This is for our
+reference year of 2012, where we just started comparing MPAs vs
+non-MPAs, so having a lower count initially is okay as the effects
+having started yet.
 
 \begin{Shaded}
 \begin{Highlighting}[]
@@ -1200,7 +1235,11 @@ Step 8: Reconsider causal identification assumptions
 
   Like stated above, spill over has a direct impact on the control group
   from the treatment. In a good experiment, we would want these groups
-  to be ``isolated'', however spill over does not follow this.
+  to be ``isolated'', however spill over does not follow this. In the
+  case of this study, spill over has a negative affect because we are
+  interested in the differences between MPA and non-MPA sites. Spill
+  over can directly impact the control site which is not what we want in
+  a causal inference study.
 \item
   Discuss the following causal inference assumptions in the context of
   the MPA treatment effect estimator. Evaluate if each of the assumption
@@ -1211,8 +1250,13 @@ Step 8: Reconsider causal identification assumptions
   \item
     SUTVA: Stable Unit Treatment Value assumption
 
-    There is probable cause the SUTVA is violated as spill over is
-    possible.
+    SUTVA assumptions are the following: No interference and no hidden
+    variations of treatment. There is possible interference within this
+    study as spillover from MPAs can likely cause higher counts in
+    non-MPAs. The second assumption: no hidden variations of treatment
+    is stating that there are no better MPAs than others. The
+    restrictions of what you can't do apply to all of the MPAs. I
+    believe we satisfy this assumption as these MPAs are created equal.
   \item
     Excludability assumption
 
@@ -1612,13 +1656,16 @@ m1\_est\_ols\_new & m2\_est\_poi\_new & m3\_est\_log\_new \\
 28.3095 & 28.40254 & 28.40254 \\
 \end{longtable}
 
+\hypertarget{comparing-results}{%
+\subsubsection{Comparing Results}\label{comparing-results}}
+
 It is interesting to see the differences between the same models with
-different data. The coefficients of the OLS model increased slightly.
-The intercept and treat coefficient increased from 22.73 to 27.27 and
-5.36 to 7.72 respectively. Interpreting this model, we would suggest
-that MPAs are having greater affect on lobster counts as time has gone
-on. This supports the idea that there is a lag effect when implementing
-an MPA.
+data ending in 2018 and data ending in 2024. The coefficients of the OLS
+model increased slightly. The intercept and treat coefficient increased
+from 22.73 to 27.27 and 5.36 to 7.72 respectively. Interpreting this
+model, we would suggest that MPAs are having greater affect on lobster
+counts as time has gone on. This supports the idea that there is a lag
+effect when implementing an MPA.
 
 The Poisson model for both datasets is very similar. The intercept and
 treat coefficients slightly changed from 3.12 to 3.31 and 0.21 to 0.25

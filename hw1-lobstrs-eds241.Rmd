@@ -4,10 +4,10 @@ subtitle: "Assessing the Impact of Marine Protected Areas (MPAs) at 5 Reef Sites
 author: "EDS 241"
 date: "1/8/2024 (Due 1/22)"
 output: 
-    pdf_document: default
     html_document:
       theme: flatly
       code_folding: hide 
+    pdf_document: default
 ---
 
 ```{r setup, include=FALSE}
@@ -285,10 +285,6 @@ m1_ols <- lm(counts ~ treat, data = spiny_counts)
 
 summ(m1_ols, model.fit = FALSE) 
 
-ggplot(spiny_counts, aes(x = treat, y = counts)) +
-    geom_point() +
-    geom_smooth(method = lm)
-
 ```
 
 The intercept coefficient represents the y-intercept when treat = 0. When the x variable, treat (no MPA) = 0, we expect to see our y-variable (count) equal to 22.73. The treat coefficient represents the slope of our linear regression line, meaning when MPAs are present, we have an increase of 5.36 lobster counts per unit increase of treat. Since treat is a binomial variable, it can only be a 0 or a 1. This indicates that our linear regression model might not be the best fit for our data.
@@ -562,13 +558,13 @@ b.  Explain why spillover is an issue for the identification of causal effects
 
 c.  How does spillover relate to impact in this research setting?
 
-    Like stated above, spill over has a direct impact on the control group from the treatment. In a good experiment, we would want these groups to be "isolated", however spill over does not follow this.
+    Like stated above, spill over has a direct impact on the control group from the treatment. In a good experiment, we would want these groups to be "isolated", however spill over does not follow this. In the case of this study, spill over has a negative affect because we are interested in the differences between MPA and non-MPA sites. Spill over can directly impact the control site which is not what we want in a causal inference study.
 
 d.  Discuss the following causal inference assumptions in the context of the MPA treatment effect estimator. Evaluate if each of the assumption are reasonable:
 
     1)  SUTVA: Stable Unit Treatment Value assumption
 
-        SUTVA assumptions are the following: No interference and no hidden variations of treatment. There is possible interference within this study as spillover from MPAs can likely cause higher counts in non-MPAs.
+        SUTVA assumptions are the following: No interference and no hidden variations of treatment. There is possible interference within this study as spillover from MPAs can likely cause higher counts in non-MPAs. The second assumption: no hidden variations of treatment is stating that there are no better MPAs than others. The restrictions of what you can't do apply to all of the MPAs. I believe we satisfy this assumption as these MPAs are created equal.
 
     2)  Excludability assumption
 
@@ -732,7 +728,7 @@ kableExtra::kable(tibble(m1_est_ols_new, m2_est_poi_new, m3_est_log_new))
 
 ### Comparing Results
 
-It is interesting to see the differences between the same models with different data. The coefficients of the OLS model increased slightly. The intercept and treat coefficient increased from 22.73 to 27.27 and 5.36 to 7.72 respectively. Interpreting this model, we would suggest that MPAs are having greater affect on lobster counts as time has gone on. This supports the idea that there is a lag effect when implementing an MPA.
+It is interesting to see the differences between the same models with data ending in 2018 and data ending in 2024. The coefficients of the OLS model increased slightly. The intercept and treat coefficient increased from 22.73 to 27.27 and 5.36 to 7.72 respectively. Interpreting this model, we would suggest that MPAs are having greater affect on lobster counts as time has gone on. This supports the idea that there is a lag effect when implementing an MPA.
 
 The Poisson model for both datasets is very similar. The intercept and treat coefficients slightly changed from 3.12 to 3.31 and 0.21 to 0.25 respectively. The assumptions from the plots for both models are almost exactly the same. They both showed similar observed and predicted pathways. The dispersion ration slightly decreased and the zero inflation ratio stayed the same at 0.
 
