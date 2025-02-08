@@ -568,7 +568,7 @@ d.  Discuss the following causal inference assumptions in the context of the MPA
 
     1)  SUTVA: Stable Unit Treatment Value assumption
 
-        There is probable cause the SUTVA is violated as spill over is possible.
+        SUTVA assumptions are the following: No interference and no hidden variations of treatment. There is possible interference within this study as spillover from MPAs can likely cause higher counts in non-MPAs.
 
     2)  Excludability assumption
 
@@ -729,6 +729,8 @@ m3_est_log_new = (exp(0.25)- 1)*100
 # Kable table 
 kableExtra::kable(tibble(m1_est_ols_new, m2_est_poi_new, m3_est_log_new))
 ```
+
+### Comparing Results
 
 It is interesting to see the differences between the same models with different data. The coefficients of the OLS model increased slightly. The intercept and treat coefficient increased from 22.73 to 27.27 and 5.36 to 7.72 respectively. Interpreting this model, we would suggest that MPAs are having greater affect on lobster counts as time has gone on. This supports the idea that there is a lag effect when implementing an MPA.
 
